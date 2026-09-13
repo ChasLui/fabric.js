@@ -7,164 +7,96 @@ on:
     branches: [master]
     paths-ignore: [CHANGELOG.md]
 
-jobs:
-  prime-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        uses: ./.github/actions/cached-install
-        with:
-          node-version: 20.x
-          install-system-deps: false
-      - name: Build fabric.js
-        uses: ./.github/actions/build-fabric-cached
-  node-coverage:
-    needs: [prime-build]
-    runs-on: ubuntu-latest
-    name: Node 20.x ${{ matrix.suite }} tests
-    strategy:
-      fail-fast: false
-      matrix:
-        # For more information see:
-        # https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-        # supported Node.js release schedule: https://nodejs.org/en/about/releases/
-        suite: [unit, visual]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cached-install
-        with:
-          node-version: 20.x
-          install-system-deps: false
-      - name: Build fabric.js
-        uses: ./.github/actions/build-fabric-cached
-      - name: Run ${{ matrix.suite }} tests with coverage
-        if: matrix.suite == 'unit'
-        run: npm run test:coverage
-      - name: Run ${{ matrix.suite }} tests with coverage
-        if: matrix.suite == 'visual'
-        run: npm run test:visual:coverage
-      - name: Upload test coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.suite }}
-          path: .nyc_output/*.json
-  browser:
-    needs: [prime-build]
-    name: ${{ matrix.target }} ${{ matrix.suite }} tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
-        target: [chrome, firefox]
-        suite: [unit, visual]
-      fail-fast: false
-    steps:
-      - name: Unit tests on browser ${{ matrix.target }}
-        uses: actions/checkout@v4
-      - uses: ./.github/actions/cached-install
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Build fabric.js
-        uses: ./.github/actions/build-fabric-cached
-      - name: Run ${{ matrix.target }} ${{ matrix.suite }} headless test
-        run: xvfb-run npm run test -- -c ${{ matrix.target }} -s ${{ matrix.suite }}
-  node:
-    needs: [prime-build]
-    runs-on: ubuntu-latest
-    name: Node ${{ matrix.node-version }} ${{ matrix.suite }} tests
-    strategy:
-      fail-fast: false
-      matrix:
-        # For more information see:
-        # https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-        # supported Node.js release schedule: https://nodejs.org/en/about/releases/
-        node-version: ['18.x']
-        suite: [unit, visual]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cached-install
-        with:
-          node-version: ${{ matrix.node-version }}
-          install-system-deps: 'false'
-      - name: Build fabric.js
-        uses: ./.github/actions/build-fabric-cached
-      - name: Run ${{ matrix.suite }} tests
-        run: npm run test -- -c node -s ${{ matrix.suite }}
-  jest:
-    name: Jest tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cached-install
-        with:
-          node-version: 20.x
-          install-system-deps: false
-      - name: Run Jest unit test
-        run: npm run test:jest:coverage
-      - name: Upload test coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-jest
-          path: .nyc_output/*.json
+permissions:
+  contents: read
 
-  e2e:
-    needs: [prime-build]
-    name: Playwright tests
-    runs-on: ubuntu-latest
+jobs:
+  vitest-coverage:
+    name: Vitest tests Node 24
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: ./.github/actions/cached-install
+        with:
+          node-version: 24.x
+          install-system-deps: false
+      - name: Run Vitest unit test
+        run: pnpm run test:vitest:coverage
+      - name: Upload test coverage
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: coverage-vitest
+          path: ./.nyc_output/coverage-summary.txt
+          include-hidden-files: true
+      - name: Upload Sonarqube coverage
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: coverage-vitest-sonarqube
+          path: ./.nyc_output/lcov.info
+          include-hidden-files: true
+  vitest-browser:
+    name: Vitest tests ${{matrix.browser}}
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: ./.github/actions/cached-install
+        with:
+          node-version: 24.x
+          install-system-deps: false
+      - name: Install Playwright Browsers ${{matrix.browser}}
+        run: pnpm exec playwright install --with-deps ${{matrix.browser}}
+      - name: Run Vitest unit test
+        run: xvfb-run pnpm run test:vitest:${{matrix.browser}}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: true
+  vitest-node-20:
+    name: Vitest tests node 20
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - uses: ./.github/actions/cached-install
         with:
           node-version: 20.x
+          install-system-deps: false
+      - name: Run Vitest unit test
+        run: pnpm run test:vitest
+  vitest-node-22:
+    name: Vitest tests node 22
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: ./.github/actions/cached-install
+        with:
+          node-version: 22.x
+          install-system-deps: false
+      - name: Run Vitest unit test
+        run: pnpm run test:vitest
+  e2e:
+    name: Playwright tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: ./.github/actions/cached-install
+        with:
+          node-version: 24.x
+          install-system-deps: false
       - name: Build fabric.js
-        uses: ./.github/actions/build-fabric-cached
+        run: pnpm run build:fast
         # Playwright suggests against caching the browser install
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run Playwright tests
-        run: xvfb-run npm run test:e2e
+        run: xvfb-run pnpm run test:e2e
       - name: Upload Test Output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: failure()
         with:
           name: e2e-report
-          path: ./e2e/test-report/
-      - name: Upload Test Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-e2e
-          path: ./e2e/test-results/**/coverage.json
-  coverage:
-    needs: [node-coverage, e2e]
-    name: Coverage reporting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cached-install
-        with:
-          node-version: 20.x
-          install-system-deps: false
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-unit
-          path: .nyc_output
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-visual
-          path: .nyc_output
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-e2e
-          path: .nyc_output
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-jest
-          path: .nyc_output
-      - run: ls -l .nyc_output
-      - run: npm run coverage:report
-      - uses: romeovs/lcov-reporter-action@v0.4.0
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          delete-old-comments: true
+          path: ./packages/e2e/test-report/
+          include-hidden-files: true

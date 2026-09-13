@@ -1,40 +1,58 @@
 import * as fabric from 'fabric';
+import * as extensions from 'fabric/extensions';
 
 export function testCase(canvas: fabric.Canvas) {
-  const textValue = 'fabric.js sandbox';
-  const text = new fabric.Textbox(textValue, {
-    originX: 'center',
-    splitByGrapheme: true,
-    width: 200,
+  extensions.addGestures(canvas);
+  canvas.on('pinch', extensions.pinchEventHandler.bind(canvas));
+  canvas.on('rotate', extensions.rotateEventHandler.bind(canvas));
+  canvas.on('mouse:dblclick', () => console.log('double'));
+  canvas.on('mouse:tripleclick', () => console.log('triple'));
+  const text2 = new fabric.IText(
+    'On the other hand, we denounce with righteous indignation and dislike men who\n are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire\n, that they cannot foresee the pain and trouble that are bound to ensue;\n and equal blame belongs to those who fail in their duty through weakness of will, which is the same as\n saying through shrinking from toil and pain.\n These cases are perfectly simple and easy to distinguish.\n In a free hour, when our power of choice is untrammelled and\n when nothing prevents our being able to do what we like best, every pleasure is to\n be welcomed and every pain avoided.',
+    {
+      objectCaching: false,
+      fontFamily: 'Arial',
+      strokeWidth: 0,
+      top: 120,
+      textAlign: 'center',
+      left: 260,
+      fontSize: 24,
+      width: 600,
+    },
+  );
+  const text3 = new fabric.FabricText('TESTING SVG DELTAY', {
     top: 20,
-    styles: fabric.util.stylesFromArray(
-      [
-        {
-          style: {
-            fontWeight: 'bold',
-            fontSize: 64,
-          },
-          start: 0,
-          end: 9,
+    left: 180,
+    styles: {
+      0: {
+        12: {
+          deltaY: -10,
+          fontSize: 25,
         },
-      ],
-      textValue,
-    ),
-  });
-  canvas.add(text);
-  canvas.centerObjectH(text);
-  function animate(toState) {
-    text.animate(
-      { scaleX: Math.max(toState, 0.1) * 2 },
-      {
-        onChange: () => canvas.renderAll(),
-        onComplete: () => animate(!toState),
-        duration: 1000,
-        easing: toState
-          ? fabric.util.ease.easeInOutQuad
-          : fabric.util.ease.easeInOutSine,
+        13: {
+          deltaY: -10,
+          fontSize: 25,
+        },
+        14: {
+          deltaY: -10,
+          fontSize: 25,
+        },
+        15: {
+          deltaY: -10,
+          fontSize: 25,
+        },
+        16: {
+          deltaY: -10,
+          fontSize: 25,
+        },
+        17: {
+          deltaY: -10,
+          fontSize: 25,
+        },
       },
-    );
-  }
-  // animate(1);
+    },
+  });
+  canvas.setDimensions({ width: 900, height: 700 });
+  canvas.add(text2, text3);
+  canvas.centerObject(text2);
 }

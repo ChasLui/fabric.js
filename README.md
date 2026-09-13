@@ -1,49 +1,35 @@
 # Fabric.js
 
-<a href="http://fabricjs.com/kitchensink" target="_blank"><img align="right" src="/lib/screenshot.png" style="width:400px"></a>
+<a href="http://fabricjs.com/kitchensink" target="_blank"><img align="right" src="/lib/screenshot.png" width="400"></a>
 
 A **simple and powerful Javascript HTML5 canvas library**.
 
 - [**Website**][website]
+- [**Old V5 documentation**](https://fabric5.fabricjs.com)
 - [**GOTCHAS**][gotchas]
 - [**Contributing, Developing and More**](CONTRIBUTING.md)
 
----
+## Special Thanks
 
-<!-- build/coverage status, climate -->
+Here is a section for recognition of companies or individuals that support fabricJS with a sponsorship
 
-[![🩺](../../actions/workflows/build.yml/badge.svg)](../../actions/workflows/build.yml)
-[![🧪](../../actions/workflows/tests.yml/badge.svg)](../../actions/workflows/tests.yml)
-[![CodeQL](../../actions/workflows/codeql-analysis.yml/badge.svg)](../../actions/workflows/codeql-analysis.yml)
+   <a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=fabric.js" >
+      <img alt="Atlascloud sponsorship" width="300" height="auto" src="https://www.atlascloud.ai/logo.svg" style="background-color: white;">
+   </a>
 
----
+Atlas Cloud is a full-modal AI inference platform that gives developers a single AI API to access video generation, image generation, and LLM APIs. Instead of managing multiple vendor integrations, you connect once and get unified access to 300+ curated models across all modalities.
+Check out Atlas Cloud's new coding plan promotion for more budget-friendly API access：[https://www.atlascloud.ai/console/coding-plan](https://www.atlascloud.ai/console/coding-plan?utm_source=github&utm_medium=link&utm_campaign=fabric.js)
 
-<!-- npm, bower, CDNJS versions, downloads -->
-
-[![cdnjs](https://img.shields.io/cdnjs/v/fabric.js.svg)][cdnjs]
-[![jsdelivr](https://data.jsdelivr.com/v1/package/npm/fabric/badge)][jsdelivr]
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/fabricjs/fabric.js)
-
-[![NPM](https://badge.fury.io/js/fabric.svg)](http://badge.fury.io/js/fabric)
-[![Downloads per month](https://img.shields.io/npm/dm/fabric.svg)](https://www.npmjs.org/package/fabric)
-[![Bower](https://badge.fury.io/bo/fabric.svg)](http://badge.fury.io/bo/fabric)
-
----
-
-[![Sponsor asturur](https://img.shields.io/static/v1?label=Sponsor%20asturur&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/asturur)
-[![Sponsor melchiar](https://img.shields.io/static/v1?label=Sponsor%20melchiar&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/melchiar)
-[![Sponsor ShaMan123](https://img.shields.io/static/v1?label=Sponsor%20ShaMan123&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/ShaMan123)
-[![Patreon](https://img.shields.io/static/v1?label=Patreon&message=%F0%9F%91%8D&logo=Patreon&color=blueviolet)](https://www.patreon.com/fabricJS)
-
----
+</div>
 
 ## Features
 
 - Out of the box interactions such as scale, move, rotate, skew, group...
 - Built in shapes, controls, animations, image filters, gradients, patterns, brushes...
 - `JPG`, `PNG`, `JSON` and `SVG` i/o
-- [Typed and modular](#migrating-to-v6)
-- [Unit tested](CONTRIBUTING.md#%F0%9F%A7%AA%20testing)
+- Typed and modular
+- [Unit tested](CONTRIBUTING.md#-testing)
+- Security efforts [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12579/badge)](https://www.bestpractices.dev/projects/12579)
 
 #### Supported Browsers/Environments
 
@@ -58,15 +44,77 @@ A **simple and powerful Javascript HTML5 canvas library**.
 |    IE11     |        ❌         |
 |   Node.js   |        ✔️         | [Node.js installation](#nodejs) |
 
-Fabric.js Does not use transpilation by default, the browser version we support is determined by the level of canvas api we want to use and some js syntax. While JS can be easily transpiled, canvas API can't.
+Fabric.js does not use polyfills by default, or tries to keep it at minimum. the browser version we support is determined by the level of canvas api we want to use and some js syntax. While JS can be easily transpiled, canvas API can't.
 
 ## Installation
 
+For new applications, install the environment-specific package:
+
+```bash
+# Browser applications
+npm install @fabricjs/browser
+
+# Node.js applications
+npm install @fabricjs/node
+```
+
+The legacy `fabric` package remains supported for existing applications:
+
 ```bash
 $ npm install fabric --save
-// or
+# or use yarn
 $ yarn add fabric
+# or use pnpm
+$ pnpm add fabric
 ```
+
+## Packages and migration
+
+| Package             | Role                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `fabric`            | Legacy compatibility facade. It re-exports `@fabricjs/browser`.                                                                 |
+| `@fabricjs/browser` | Preferred entrypoint for new browser applications.                                                                              |
+| `@fabricjs/node`    | Preferred entrypoint for new Node.js applications. It owns the Node-specific dependencies.                                      |
+| `@fabricjs/core`    | Shared, environment-neutral runtime used by the browser and Node packages. It is intended for advanced and shared dependencies. |
+| Extension packages  | Optional features imported individually, such as `@fabricjs/aligning-guidelines`.                                               |
+
+Existing imports continue to work:
+
+```js
+import { Canvas } from 'fabric';
+import { StaticCanvas } from 'fabric/node';
+```
+
+New applications should prefer the explicit entrypoints:
+
+```js
+import { Canvas } from '@fabricjs/browser';
+import { StaticCanvas } from '@fabricjs/node';
+import { AligningGuidelines } from '@fabricjs/aligning-guidelines';
+```
+
+The `fabric` and `fabric/node` facades share the same class identities as
+their corresponding workspace packages. Keep `fabric` and every
+`@fabricjs/*` package on matching versions; mixing mismatched versions can
+load separate runtimes.
+
+`@fabricjs/core` has no Node-specific runtime dependencies, but it is not a
+DOM-free API. Advanced consumers using core APIs that touch DOM or canvas must
+provide a suitable environment implementation.
+
+### Legacy distribution files
+
+The ESM `fabric` and `fabric/node` entries are small compatibility facades over
+the workspace packages. The legacy standalone files remain available for
+existing usage:
+
+- `dist/index.js` and `dist/index.min.js` are full browser UMD builds from
+  `@fabricjs/browser`, for `<script>` tags and `require('fabric')`.
+- `dist/index.node.cjs` is the legacy CommonJS compatibility build for
+  `require('fabric/node')`.
+
+New ESM applications should continue to import `@fabricjs/browser` or
+`@fabricjs/node` directly.
 
 #### Browser
 
@@ -77,6 +125,11 @@ See [browser modules][mdn_es6] for using es6 imports in the browser or use a ded
 
 #### Node.js
 
+We strongly recommend to run your applications only LTS versions of node.
+
+Said so the minimum supported version of node is 20.
+We bump up the minimum version of node with a Major release only when the dependencies force us to do so.
+
 Fabric.js depends on [node-canvas][node_canvas] for a canvas implementation (`HTMLCanvasElement` replacement) and [jsdom][jsdom] for a `window` implementation on node.
 This means that you may encounter `node-canvas` limitations and [bugs][node_canvas_issues].
 
@@ -85,11 +138,17 @@ Follow these [instructions][node_canvas_install] to get `node-canvas` up and run
 ## Quick Start
 
 ```js
-// v6
-import { Canvas, Rect } from 'fabric'; // browser
-import { StaticCanvas, Rect } from 'fabric/node'; // node
+// Preferred entrypoints for new applications
+import { Canvas } from '@fabricjs/browser';
+import { StaticCanvas } from '@fabricjs/node';
+```
 
-// v5
+```js
+// Supported compatibility entrypoints
+import { Canvas } from 'fabric';
+import { StaticCanvas } from 'fabric/node';
+
+// v5 compatibility
 import { fabric } from 'fabric';
 ```
 
@@ -98,7 +157,7 @@ import { fabric } from 'fabric';
 ```html
 <canvas id="canvas" width="300" height="300"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/fabric"></script>
+<script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
 <script>
   const canvas = new fabric.Canvas('canvas');
   const rect = new fabric.Rect({
@@ -114,7 +173,7 @@ import { fabric } from 'fabric';
 
 </details>
 
-<details><summary><b>ReactJS</b></summary>
+<details><summary><b>React.js</b></summary>
 
 ```tsx
 import React, { useEffect, useRef } from 'react';
@@ -195,7 +254,6 @@ See our ready to use [templates](./.codesandbox/templates/).
 
 ## More Resources
 
-- [WIP new fabricjs.com](https://fabricjs.github.io)
 - [Demos on `fabricjs.com`][demos]
 - [Fabric.js on `Twitter`][twitter]
 - [Fabric.js on `CodeTriage`][code_triage]
@@ -224,7 +282,7 @@ See our ready to use [templates](./.codesandbox/templates/).
 [codepens]: https://codepen.io/tag/fabricjs
 [contributors]: https://github.com/fabricjs/fabric.js/graphs/contributors
 [demos]: http://fabricjs.com/demos/
-[gotchas]: http://fabricjs.com/fabric-gotchas
+[gotchas]: https://fabricjs.com/docs/old-docs/gotchas/
 [html-to-image]: https://github.com/bubkoo/html-to-image
 [jsdelivr]: https://www.jsdelivr.com/package/npm/fabric
 [jsdom]: https://github.com/jsdom/jsdom

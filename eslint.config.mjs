@@ -1,55 +1,68 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import path from 'node:path';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
 import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
+import { dirname } from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default [
+export default tseslint.config(
   {
     ignores: [
-      'src/mixins/eraser_brush.mixin.ts',
-      'src/util/lang_class.ts',
-      'src/parkinglot',
+      'dist/*',
+      'dist-extensions/*',
+      'packages/*/dist/*',
+      'packages/e2e/test-report/*',
+      'packages/e2e/test-results/*',
+      '.codesandbox/**/*',
+      'packages/website/**/*',
+      'packages/core/src/mixins/eraser_brush.mixin.ts',
+      'packages/core/src/util/lang_class.ts',
+      'packages/core/src/parkinglot',
     ],
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-  ),
-  {
-    plugins: {
-      '@typescript-eslint': typescriptEslint,
-    },
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
+  prettier,
 
+  {
     languageOptions: {
-      parser: tsParser,
       ecmaVersion: 5,
       sourceType: 'script',
       globals: {
         console: 'readonly',
       },
       parserOptions: {
-        project: true,
-        tsconfigRootDir: './',
+        project: 'tsconfig.spec.json',
+        tsconfigRootDir: __dirname,
       },
     },
+  },
 
+  {
+    files: ['**/*.ts'],
     rules: {
       '@typescript-eslint/consistent-type-exports': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unnecessary-type-arguments': 'error',
       '@typescript-eslint/no-restricted-types': 1,
       '@typescript-eslint/ban-ts-comment': 1,
-
+      '@typescript-eslint/no-explicit-any': ['warn'],
+      '@typescript-eslint/no-unused-expressions': [
+        'error',
+        {
+          allowShortCircuit: true,
+        },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      'no-negated-condition': 'error',
       'no-restricted-globals': [
         'error',
         {
@@ -83,26 +96,31 @@ export default [
           message: 'Use `FabricError`',
         },
       ],
+    },
+  },
 
-      '@typescript-eslint/no-explicit-any': ['warn'],
-
-      '@typescript-eslint/no-unused-expressions': [
-        'error',
-        {
-          allowShortCircuit: true,
-        },
-      ],
-
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          ignoreRestSiblings: true,
-          argsIgnorePattern: '^_',
-        },
-      ],
+  {
+    files: ['packages/e2e/playwright.setup.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
   {
-    files: ['**/*.ts'],
+    files: ['packages/e2e/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: 'packages/e2e/tsconfig.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-empty': 'off',
+      'no-restricted-globals': 'off',
+      'no-restricted-syntax': 'off',
+      'no-shadow-restricted-names': 'off',
+    },
   },
-];
+);

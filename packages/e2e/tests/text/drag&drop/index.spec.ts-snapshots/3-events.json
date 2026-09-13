@@ -1,0 +1,266 @@
+[
+  [
+    "dragstart",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a"
+    },
+    "canvas"
+  ],
+  [
+    "dragstart",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "dragenter",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a",
+      "subTargets": [],
+      "dragSource": "a"
+    },
+    "canvas"
+  ],
+  [
+    "dragenter",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 117,
+        "y": 50
+      },
+      "scenePoint": {
+        "x": 117,
+        "y": 50
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "dragleave",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 39,
+        "y": 110
+      },
+      "scenePoint": {
+        "x": 39,
+        "y": 110
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "dragenter",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 87,
+        "y": 123
+      },
+      "scenePoint": {
+        "x": 87,
+        "y": 123
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "dragleave",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 261,
+        "y": 89
+      },
+      "scenePoint": {
+        "x": 261,
+        "y": 89
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "dragenter",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 435,
+        "y": 55
+      },
+      "scenePoint": {
+        "x": 435,
+        "y": 55
+      },
+      "target": "b"
+    },
+    "b"
+  ],
+  [
+    "dragleave",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 385,
+        "y": 76
+      },
+      "scenePoint": {
+        "x": 385,
+        "y": 76
+      },
+      "target": "b"
+    },
+    "b"
+  ],
+  [
+    "dragenter",
+    {
+      "subTargets": [],
+      "dragSource": "a",
+      "canDrop": false,
+      "e": {
+        "isTrusted": true
+      },
+      "viewportPoint": {
+        "x": 250,
+        "y": 130
+      },
+      "scenePoint": {
+        "x": 250,
+        "y": 130
+      },
+      "target": "a"
+    },
+    "a"
+  ],
+  [
+    "drop",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a",
+      "subTargets": [],
+      "dragSource": "a",
+      "viewportPoint": {
+        "x": 240,
+        "y": 140
+      },
+      "scenePoint": {
+        "x": 240,
+        "y": 140
+      },
+      "didDrop": false
+    },
+    "canvas"
+  ],
+  [
+    "changed",
+    {
+      "index": 11,
+      "action": "drop"
+    },
+    "a"
+  ],
+  [
+    "text:changed",
+    {
+      "target": "a"
+    },
+    "canvas"
+  ],
+  [
+    "drop",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a",
+      "subTargets": [],
+      "dragSource": "a",
+      "viewportPoint": {
+        "x": 240,
+        "y": 140
+      },
+      "scenePoint": {
+        "x": 240,
+        "y": 140
+      },
+      "didDrop": true,
+      "dropTarget": "a"
+    },
+    "a"
+  ],
+  [
+    "dragend",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a",
+      "subTargets": [],
+      "dragSource": "a",
+      "didDrop": true,
+      "dropTarget": "a"
+    },
+    "canvas"
+  ],
+  [
+    "dragend",
+    {
+      "e": {
+        "isTrusted": true
+      },
+      "target": "a",
+      "subTargets": [],
+      "dragSource": "a",
+      "didDrop": true,
+      "dropTarget": "a"
+    },
+    "a"
+  ]
+]

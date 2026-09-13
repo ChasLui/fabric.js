@@ -1,0 +1,39 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["@vitest/browser/providers/playwright"],
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "fabric": ["./index"],
+      "fabric/node": ["./index.node"],
+      "fabric/extensions": ["./extensions"],
+      "@fabricjs/core": ["./packages/core/src/index"],
+      "@fabricjs/aligning-guidelines": [
+        "./packages/aligning-guidelines/src/index"
+      ],
+      "@fabricjs/browser": ["./packages/browser/src/index"],
+      "@fabricjs/cropping-controls": ["./packages/cropping-controls/src/index"],
+      "@fabricjs/data-updaters": ["./packages/data-updaters/src/index"],
+      "@fabricjs/gradient-controls": ["./packages/gradient-controls/src/index"],
+      "@fabricjs/node": ["./packages/node/src/index"],
+      "@fabricjs/westures-integration": [
+        "./packages/westures-integration/src/index"
+      ]
+    }
+  },
+  "include": [
+    "fabric.ts",
+    "index.ts",
+    "index.node.ts",
+    "packages/core/src/**/*",
+    "extensions/**/*",
+    "packages/*/src/**/*",
+    "vitest.d.ts",
+    "vitest.env.d.ts",
+    "vitest.setup.ts",
+    "vitest.config.ts",
+    "vitest.extend.ts"
+  ],
+  "exclude": ["dist", "dist-extensions", "packages/e2e", "test"]
+}

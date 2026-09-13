@@ -1,8 +1,45 @@
-const REQUESTED_COMMENTS_PER_PAGE = 20;
-
-const COMMENT_MARKER = '<!-- BUILD STATS COMMENT -->';
+import fs from 'node:fs';
+import path from 'node:path';
+import { wd } from './dirname.mjs';
+import { buildableWorkspacePackages } from './workspace-packages.mjs';
 
 const MAX_COMMENT_CHARS = 65536;
+
+const buildOutputs = [
+  {
+    importName: 'fabric (browser UMD)',
+    generated: 'dist/index.js',
+    minified: 'dist/index.min.js',
+  },
+  {
+    importName: 'fabric/node (CJS)',
+    generated: 'dist/index.node.cjs',
+  },
+  ...buildableWorkspacePackages.map(({ directory, importName }) => ({
+    importName,
+    generated: `packages/${directory}/dist/index.mjs`,
+  })),
+  {
+    importName: 'fabric/extensions (UMD)',
+    minified: 'dist-extensions/fabric-extensions.min.js',
+  },
+];
+
+function outputSize(file) {
+  return fs.statSync(path.resolve(wd, file)).size;
+}
+
+export function buildStats() {
+  return Object.fromEntries(
+    buildOutputs.map(({ importName, generated, minified }) => [
+      importName,
+      {
+        ...(generated ? { generated: outputSize(generated) } : {}),
+        ...(minified ? { minified: outputSize(minified) } : {}),
+      },
+    ]),
+  );
+}
 
 function printSize(a, b) {
   const diff = b - a;
@@ -12,107 +49,31 @@ function printSize(a, b) {
 }
 
 function printSizeKByte(a, b) {
+  if (b == null) {
+    return '—';
+  }
   return printSize(a / 1024, b / 1024);
 }
 
-export async function findCommentId(github, context) {
-  let page = 0;
-  let response;
-  do {
-    response = await github.rest.issues.listComments({
-      issue_number: context.issue.number,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      per_page: REQUESTED_COMMENTS_PER_PAGE,
-      page: page,
-      sort: 'updated',
-      direction: 'desc',
-    });
-    const found = response.data.find(
-      (comment) => !!comment.user && comment.body.startsWith(COMMENT_MARKER),
-    )?.id;
-    if (found) {
-      return found;
-    }
-    page++;
-  } while (response.data.length === REQUESTED_COMMENTS_PER_PAGE);
-}
-
-export async function run({ github, context, a, b }) {
-  const {
-    repo: { owner, repo },
-  } = context;
-
+export async function run_simple({ original, modified }) {
   const table = [
-    ['file / KB (diff)', 'bundled', 'minified', 'gzipped'],
-    ['---', '---', '---', '---'],
-    ...Object.entries(b.size).map(([file, _b]) => {
-      const _a = {
-        bundled: 0,
-        minified: 0,
-        gzipped: 0,
-        ...(a.size[file] || {}),
-      };
-      return [
-        file,
-        printSizeKByte(_a.bundled, _b.bundled),
-        printSizeKByte(_a.minified, _b.minified),
-        printSizeKByte(_a.gzipped, _b.gzipped),
-      ];
-    }),
-  ];
-
-  const body = [
-    COMMENT_MARKER,
-    '**Build Stats**',
-    '',
-    ...table.map((row) => ['', ...row, ''].join(' | ')),
-    '',
-  ]
-    .join('\n')
-    .slice(0, MAX_COMMENT_CHARS);
-
-  const commentId = await findCommentId(github, context);
-
-  await (commentId
-    ? github.rest.issues.updateComment({
-        repo,
-        owner,
-        comment_id: commentId,
-        body,
-      })
-    : github.rest.issues.createComment({
-        repo,
-        owner,
-        issue_number: context.payload.pull_request.number,
-        body,
-      }));
-}
-
-export async function run_simple({ github, context, a, b }) {
-  const {
-    repo: { owner, repo },
-  } = context;
-
-  const table = [
-    ['file / KB (diff)', 'bundled', 'minified'],
+    ['entrypoint / KiB (diff)', 'generated', 'minified'],
     ['---', '---', '---'],
-    ...Object.entries(b.size).map(([file, _b]) => {
-      const _a = {
-        bundled: 0,
+    ...Object.entries(modified.size).map(([file, _modified]) => {
+      const _original = {
+        generated: 0,
         minified: 0,
-        ...(a.size[file] || {}),
+        ...(original.size[file] || {}),
       };
       return [
         file,
-        printSizeKByte(_a.bundled, _b.bundled),
-        printSizeKByte(_a.minified, _b.minified),
+        printSizeKByte(_original.generated, _modified.generated),
+        printSizeKByte(_original.minified, _modified.minified),
       ];
     }),
   ];
 
-  const body = [
-    COMMENT_MARKER,
+  return [
     '**Build Stats**',
     '',
     ...table.map((row) => ['', ...row, ''].join(' | ')),
@@ -120,20 +81,4 @@ export async function run_simple({ github, context, a, b }) {
   ]
     .join('\n')
     .slice(0, MAX_COMMENT_CHARS);
-
-  const commentId = await findCommentId(github, context);
-
-  await (commentId
-    ? github.rest.issues.updateComment({
-        repo,
-        owner,
-        comment_id: commentId,
-        body,
-      })
-    : github.rest.issues.createComment({
-        repo,
-        owner,
-        issue_number: context.payload.pull_request.number,
-        body,
-      }));
 }
